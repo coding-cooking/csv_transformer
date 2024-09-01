@@ -1,5 +1,6 @@
 import time
 import os
+import sys
 import pandas as pd
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -91,12 +92,19 @@ class CSVHandler(FileSystemEventHandler):
 
 
 if __name__ == "__main__":
-    folder_to_watch = "."  # Current directory, change this if needed
+    # Determine the correct folder to watch
+    if getattr(sys, 'frozen', False):
+        # The application is frozen (PyInstaller)
+        folder_to_watch = os.path.dirname(sys.executable)
+    else:
+        # Running in a normal Python environment
+        folder_to_watch = os.path.dirname(os.path.abspath(__file__))
+
     event_handler = CSVHandler()
     observer = Observer()
     observer.schedule(event_handler, folder_to_watch, recursive=False)
     observer.start()
-    print(f"Watching for CSV files in {os.path.abspath(folder_to_watch)}...")
+    print(f"Watching for CSV files in {folder_to_watch}...")
     try:
         while True:
             time.sleep(1)
